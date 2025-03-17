@@ -1,5 +1,6 @@
 
 import { ReactElement } from 'react';
+import { Layout } from 'react-grid-layout';
 
 export type ComponentType = 
   | 'text'
@@ -13,7 +14,7 @@ export type ComponentType =
   | 'chart'
   | 'container';
 
-export interface LayoutItem {
+export interface LayoutItem extends Layout {
   i: string;
   x: number;
   y: number;

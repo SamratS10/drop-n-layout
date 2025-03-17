@@ -1,6 +1,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Responsive, WidthProvider } from 'react-grid-layout';
+import { Responsive, WidthProvider, Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import useLayoutStore from '@/store/layoutStore';
@@ -60,8 +60,8 @@ const GridLayout: React.FC = () => {
     }
   }, [addComponent]);
 
-  const handleLayoutChange = useCallback((layout: any) => {
-    updateLayout(layout);
+  const handleLayoutChange = useCallback((currentLayout: Layout[]) => {
+    updateLayout(currentLayout);
   }, [updateLayout]);
 
   // Add body click handler to deselect

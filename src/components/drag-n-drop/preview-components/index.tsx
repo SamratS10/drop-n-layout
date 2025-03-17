@@ -12,28 +12,57 @@ import TableComponent from './TableComponent';
 import ChartComponent from './ChartComponent';
 import ContainerComponent from './ContainerComponent';
 
-const PreviewComponent: React.FC<PreviewComponentProps> = ({ type, props }) => {
+const PreviewComponent: React.FC<PreviewComponentProps> = ({ type, props = {} }) => {
+  // Set default text for components that require it
   switch (type) {
     case 'text':
-      return <Text {...props} />;
+      return <Text text={props.text || 'Text'} color={props.color} size={props.size} />;
     case 'heading':
-      return <Heading {...props} />;
+      return <Heading text={props.text || 'Heading'} level={props.level} color={props.color} />;
     case 'card':
-      return <CardComponent {...props} />;
+      return <CardComponent 
+        title={props.title} 
+        content={props.content} 
+        hasHeader={props.hasHeader} 
+      />;
     case 'button':
-      return <ButtonComponent {...props} />;
+      return <ButtonComponent 
+        text={props.text || 'Button'} 
+        variant={props.variant} 
+        size={props.size} 
+      />;
     case 'image':
-      return <ImageComponent {...props} />;
+      return <ImageComponent 
+        src={props.src || 'https://source.unsplash.com/random/800x600/?minimal'} 
+        alt={props.alt || 'Image'} 
+        aspectRatio={props.aspectRatio} 
+      />;
     case 'divider':
-      return <DividerComponent {...props} />;
+      return <DividerComponent orientation={props.orientation} />;
     case 'spacer':
-      return <SpacerComponent {...props} />;
+      return <SpacerComponent height={props.height} />;
     case 'table':
-      return <TableComponent {...props} />;
+      return <TableComponent 
+        rows={props.rows} 
+        columns={props.columns} 
+        headers={props.headers} 
+        data={props.data} 
+      />;
     case 'chart':
-      return <ChartComponent {...props} />;
+      return <ChartComponent 
+        type={props.type} 
+        data={props.data || {
+          labels: ['Jan', 'Feb', 'Mar'],
+          datasets: [{ label: 'Data', data: [3, 6, 9] }]
+        }} 
+      />;
     case 'container':
-      return <ContainerComponent {...props} />;
+      return <ContainerComponent 
+        background={props.background} 
+        border={props.border} 
+        padding={props.padding} 
+        rounded={props.rounded} 
+      />;
     default:
       return <div>Unknown Component Type</div>;
   }

@@ -1,15 +1,14 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { DraggableItemProps } from '@/types/layout';
 import { 
-  Text, 
-  Heading, 
-  Button, 
-  Card, 
-  ImageIcon, 
-  Separator, 
-  Space, 
+  Type as TextIcon, 
+  Heading as HeadingIcon, 
+  Square as ButtonIcon, 
+  SquareStack as CardIcon, 
+  Image as ImageIcon, 
+  SplitSquareHorizontal as SeparatorIcon, 
+  Space as SpaceIcon, 
   Table as TableIcon, 
   BarChart, 
   Box 
@@ -23,7 +22,7 @@ const ComponentLibrary: React.FC = () => {
       id: 'text',
       type: 'text',
       title: 'Text',
-      icon: <Text className="w-5 h-5" />,
+      icon: <TextIcon className="w-5 h-5" />,
       defaultProps: { 
         text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris.',
         color: 'text-foreground',
@@ -38,7 +37,7 @@ const ComponentLibrary: React.FC = () => {
       id: 'heading',
       type: 'heading',
       title: 'Heading',
-      icon: <Heading className="w-5 h-5" />,
+      icon: <HeadingIcon className="w-5 h-5" />,
       defaultProps: { 
         text: 'Heading',
         level: 'h2',
@@ -53,7 +52,7 @@ const ComponentLibrary: React.FC = () => {
       id: 'card',
       type: 'card',
       title: 'Card',
-      icon: <Card className="w-5 h-5" />,
+      icon: <CardIcon className="w-5 h-5" />,
       defaultProps: { 
         title: 'Card Title',
         content: 'Card content goes here',
@@ -68,7 +67,7 @@ const ComponentLibrary: React.FC = () => {
       id: 'button',
       type: 'button',
       title: 'Button',
-      icon: <Button className="w-5 h-5" />,
+      icon: <ButtonIcon className="w-5 h-5" />,
       defaultProps: { 
         text: 'Button',
         variant: 'default',
@@ -98,7 +97,7 @@ const ComponentLibrary: React.FC = () => {
       id: 'divider',
       type: 'divider',
       title: 'Divider',
-      icon: <Separator className="w-5 h-5" />,
+      icon: <SeparatorIcon className="w-5 h-5" />,
       defaultProps: { 
         orientation: 'horizontal',
       },
@@ -111,7 +110,7 @@ const ComponentLibrary: React.FC = () => {
       id: 'spacer',
       type: 'spacer',
       title: 'Spacer',
-      icon: <Space className="w-5 h-5" />,
+      icon: <SpaceIcon className="w-5 h-5" />,
       defaultProps: { 
         height: '2rem',
       },

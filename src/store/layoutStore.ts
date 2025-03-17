@@ -1,18 +1,18 @@
 
 import { create } from 'zustand';
-import { Layout } from 'react-grid-layout';
+import { Layout, ReactGridLayout } from 'react-grid-layout';
 import { ComponentItem, ComponentType, LayoutItem } from '@/types/layout';
 import { nanoid } from 'nanoid';
 
 interface LayoutState {
-  layout: Layout;
+  layout: Layout[];
   components: ComponentItem[];
   nextId: number;
   selectedItemId: string | null;
 
   // Actions
-  addComponent: (type: ComponentType, layout: LayoutItem, props: Record<string, any>) => void;
-  updateLayout: (newLayout: Layout) => void;
+  addComponent: (type: ComponentType, layoutItem: Omit<LayoutItem, "i">, props: Record<string, any>) => void;
+  updateLayout: (newLayout: Layout[]) => void;
   updateComponent: (id: string, props: Record<string, any>) => void;
   removeComponent: (id: string) => void;
   selectItem: (id: string | null) => void;
@@ -27,10 +27,10 @@ const useLayoutStore = create<LayoutState>((set, get) => ({
   nextId: 1,
   selectedItemId: null,
 
-  addComponent: (type, layout, props) => {
+  addComponent: (type, layoutItem, props) => {
     const id = `item-${get().nextId}`;
     set((state) => ({
-      layout: [...state.layout, { ...layout, i: id }],
+      layout: [...state.layout, { ...layoutItem, i: id }],
       components: [...state.components, { id, type, props }],
       nextId: state.nextId + 1,
       selectedItemId: id,
