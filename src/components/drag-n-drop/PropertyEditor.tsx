@@ -1,11 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import useLayoutStore from '@/store/layoutStore';
 import { 
   Card, 
   CardContent,
-
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
@@ -20,10 +19,12 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 
 const PropertyEditor: React.FC = () => {
   const { components, selectedItemId, updateComponent } = useLayoutStore();
   
+  // If no item is selected, prompt the user to select one
   if (!selectedItemId) {
     return (
       <Card className="w-full h-full">
@@ -46,7 +47,10 @@ const PropertyEditor: React.FC = () => {
   const { type, props } = selectedComponent;
 
   const handleChange = (key: string, value: any) => {
-    updateComponent(selectedItemId, { [key]: value });
+    // Make sure to prevent unnecessary re-renders
+    if (props[key] !== value) {
+      updateComponent(selectedItemId, { [key]: value });
+    }
   };
 
   // Render property fields based on component type
@@ -112,6 +116,15 @@ const PropertyEditor: React.FC = () => {
                 value={props.text || ''}
                 onChange={(e) => handleChange('text', e.target.value)}
               />
+              <div className="mt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleChange('text', props.text || 'My Custom Heading')}
+                >
+                  Apply Text
+                </Button>
+              </div>
             </div>
             <div className="space-y-2 mb-4">
               <Label htmlFor="level">Level</Label>
@@ -385,7 +398,7 @@ const PropertyEditor: React.FC = () => {
     <Card className="w-full h-full overflow-hidden">
       <CardHeader className="px-4 py-3">
         <CardTitle className="text-base font-medium">
-          {type.charAt(0).toUpperCase() + type.slice(1)} Properties
+          {type.charAt(0).toUpperCase() + type.slice(1)} Properties {selectedItemId ? `(${selectedItemId})` : ''}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 overflow-y-auto max-h-[calc(100vh-12rem)]">

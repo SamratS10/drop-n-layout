@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { Layout } from 'react-grid-layout';
 import { ComponentItem, ComponentType, LayoutItem } from '@/types/layout';
 import { nanoid } from 'nanoid';
+import { toast } from 'sonner';
 
 interface LayoutState {
   layout: Layout[];
@@ -55,6 +56,9 @@ const useLayoutStore = create<LayoutState>((set, get) => ({
       
       return newState;
     });
+    
+    // Provide feedback
+    toast.success(`Added ${type} component`);
   },
 
   updateLayout: (newLayout) => {
@@ -62,11 +66,26 @@ const useLayoutStore = create<LayoutState>((set, get) => ({
   },
 
   updateComponent: (id, props) => {
-    set((state) => ({
-      components: state.components.map((component) =>
-        component.id === id ? { ...component, props: { ...component.props, ...props } } : component
-      ),
-    }));
+    set((state) => {
+      // Find the component first
+      const componentIndex = state.components.findIndex(
+        (component) => component.id === id
+      );
+      
+      if (componentIndex === -1) {
+        console.warn(`Component with ID ${id} not found`);
+        return state;
+      }
+      
+      // Create a new components array with the updated component
+      const updatedComponents = [...state.components];
+      updatedComponents[componentIndex] = {
+        ...updatedComponents[componentIndex],
+        props: { ...updatedComponents[componentIndex].props, ...props }
+      };
+      
+      return { components: updatedComponents };
+    });
   },
 
   removeComponent: (id) => {
@@ -102,7 +121,13 @@ const useLayoutStore = create<LayoutState>((set, get) => ({
   },
 
   selectItem: (id) => {
-    set({ selectedItemId: id });
+    set((state) => {
+      // Only update if there's a change to prevent unnecessary renders
+      if (state.selectedItemId !== id) {
+        return { selectedItemId: id };
+      }
+      return state;
+    });
   },
 
   getLayoutJSON: () => {
@@ -125,10 +150,13 @@ const useLayoutStore = create<LayoutState>((set, get) => ({
           nextId: Math.max(...data.components.map((c: ComponentItem) => 
             parseInt(c.id.replace('item-', ''), 10)
           ), 0) + 1,
+          selectedItemId: null // Reset selection when loading new layout
         });
+        toast.success("Layout loaded successfully");
       }
     } catch (error) {
       console.error('Error parsing layout JSON:', error);
+      toast.error("Error loading layout");
     }
   },
 
@@ -140,6 +168,7 @@ const useLayoutStore = create<LayoutState>((set, get) => ({
       selectedItemId: null,
       containerParents: {}
     });
+    toast.success("Layout reset");
   },
   
   setComponentParent: (childId, parentId) => {
@@ -159,15 +188,12 @@ const useLayoutStore = create<LayoutState>((set, get) => ({
     const children: ComponentItem[] = [];
     const { components, containerParents } = get();
     
-    // First level children
+    // Find all child components of this parent
     const directChildren = components.filter(c => 
       containerParents[c.id] === parentId
     );
     
     children.push(...directChildren);
-    
-    // Don't need recursive lookup for now to avoid circular references
-    // If needed, we can implement a more sophisticated algorithm
     
     return children;
   }

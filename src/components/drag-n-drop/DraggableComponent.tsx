@@ -1,8 +1,9 @@
 
-import React, { useRef } from 'react';
-import { motion } from 'framer-motion';
-import { DraggableItemProps } from '@/types/layout';
-import useLayoutStore from '@/store/layoutStore';
+import React from 'react';
+import { useDrag } from 'react-dnd';
+import { motion, PanInfo } from 'framer-motion';
+import { ComponentType, DraggableItemProps } from '@/types/layout';
+import { Card, CardContent } from '@/components/ui/card';
 
 const DraggableComponent: React.FC<DraggableItemProps> = ({
   id,
@@ -15,46 +16,57 @@ const DraggableComponent: React.FC<DraggableItemProps> = ({
   minW,
   minH,
 }) => {
-  const addComponent = useLayoutStore((state) => state.addComponent);
-  const itemRef = useRef<HTMLDivElement>(null);
-
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    e.dataTransfer.setData('component', JSON.stringify({
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: 'COMPONENT',
+    item: {
+      id,
       type,
       defaultProps,
       defaultW,
       defaultH,
       minW,
       minH,
-    }));
-    
-    // Add some drag effect
-    if (itemRef.current) {
-      itemRef.current.classList.add('dragging');
-    }
+    },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }));
+
+  // Handle dragging with framer-motion for better visual feedback
+  const handleDragStart = () => {
+    // This is used as a visual indicator only
+    // The actual drag logic is handled by react-dnd
   };
 
-  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
-    if (itemRef.current) {
-      itemRef.current.classList.remove('dragging');
-    }
+  // These handlers need to accept the correct types from framer-motion
+  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    // Visual feedback only
+  };
+
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    // Reset any visual states
   };
 
   return (
     <motion.div
-      ref={itemRef}
+      ref={drag}
       draggable
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      className="component-item flex items-center gap-2 p-3 rounded-lg border border-border hover:border-primary/30 bg-card hover:bg-card/80 cursor-grab transition-all duration-200 shadow-sm hover:shadow"
+      onPan={handleDrag}
+      onPanEnd={handleDragEnd}
+      style={{ opacity: isDragging ? 0.5 : 1 }}
+      className="cursor-grab active:cursor-grabbing"
     >
-      <div className="flex-shrink-0 rounded-md w-8 h-8 bg-primary/10 text-primary flex items-center justify-center">
-        {icon}
-      </div>
-      <span className="text-sm font-medium">{title}</span>
+      <Card className="mb-2 hover:border-primary/50 transition-colors">
+        <CardContent className="p-3 flex items-center gap-2">
+          <div className="text-muted-foreground">
+            {icon}
+          </div>
+          <span className="text-sm font-medium">{title}</span>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 };
