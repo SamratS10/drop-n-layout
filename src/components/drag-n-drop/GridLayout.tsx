@@ -12,7 +12,16 @@ import { toast } from 'sonner';
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const GridLayout: React.FC = () => {
-  const { layout, components, updateLayout, addComponent, selectedItemId, setComponentParent } = useLayoutStore();
+  const { 
+    layout, 
+    components, 
+    updateLayout, 
+    addComponent, 
+    selectedItemId, 
+    selectItem,
+    setComponentParent 
+  } = useLayoutStore();
+  
   const gridRef = useRef<HTMLDivElement>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isDraggingOverContainer, setIsDraggingOverContainer] = useState<string | null>(null);
@@ -22,8 +31,9 @@ const GridLayout: React.FC = () => {
     setIsDraggingOver(true);
     
     // Check if we're dragging over a container
-    const containerElement = e.target as HTMLElement;
-    const containerId = containerElement.getAttribute('data-container-id');
+    const element = e.target as HTMLElement;
+    const containerElement = element.closest('[data-container-id]');
+    const containerId = containerElement?.getAttribute('data-container-id');
     
     if (containerId) {
       setIsDraggingOverContainer(containerId);
@@ -39,6 +49,7 @@ const GridLayout: React.FC = () => {
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDraggingOver(false);
     
     try {
@@ -48,10 +59,10 @@ const GridLayout: React.FC = () => {
 
       const { type, defaultProps, defaultW, defaultH, minW, minH } = componentData;
       
-      // Check if we're dropping into a container
-      const target = e.target as HTMLElement;
-      const containerId = target.getAttribute('data-container-id') || 
-                         target.closest('[data-container-id]')?.getAttribute('data-container-id');
+      // Find the container element that we're dropping into
+      const element = e.target as HTMLElement;
+      const containerElement = element.closest('[data-container-id]');
+      const containerId = containerElement?.getAttribute('data-container-id');
       
       // Handle drop in container vs grid
       if (containerId) {
@@ -105,8 +116,6 @@ const GridLayout: React.FC = () => {
 
   // Add body click handler to deselect
   useEffect(() => {
-    const selectItem = useLayoutStore.getState().selectItem;
-    
     const handleBodyClick = (e: MouseEvent) => {
       if (gridRef.current && !gridRef.current.contains(e.target as Node)) {
         selectItem(null);
@@ -118,7 +127,7 @@ const GridLayout: React.FC = () => {
     return () => {
       document.body.removeEventListener('click', handleBodyClick);
     };
-  }, []);
+  }, [selectItem]);
 
   // Filter to only show components without a parent (top-level)
   const topLevelComponents = components.filter(component => {

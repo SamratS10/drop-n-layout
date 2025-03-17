@@ -23,12 +23,25 @@ const ContainerComponent: React.FC<ContainerComponentProps> = ({
     ? useLayoutStore((state) => state.getChildComponents(id))
     : [];
   
+  const selectItem = useLayoutStore((state) => state.selectItem);
+  
+  // Stop propagation to allow selecting components inside the container
+  const handleContainerClick = (e: React.MouseEvent) => {
+    // Only select the container if the click was directly on the container
+    // and not on a child component
+    if (e.currentTarget === e.target && id) {
+      e.stopPropagation();
+      selectItem(id);
+    }
+  };
+  
   return (
     <div 
       className={`w-full h-full ${background} ${padding} ${
         border ? 'border border-border' : ''
       } ${rounded ? 'rounded-lg' : ''} relative overflow-auto`}
       data-container-id={id}
+      onClick={handleContainerClick}
     >
       {childComponents.length > 0 ? (
         <div className="w-full h-full">

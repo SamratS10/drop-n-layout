@@ -35,11 +35,16 @@ const useLayoutStore = create<LayoutState>((set, get) => ({
   addComponent: (type, layoutItem, props, parentId = null) => {
     const id = `item-${get().nextId}`;
     set((state) => {
+      // Create a new layout item only if this is not a child component of a container
+      const newLayout = parentId 
+        ? [...state.layout] 
+        : [...state.layout, { ...layoutItem, i: id }];
+      
       const newState = {
-        layout: [...state.layout, { ...layoutItem, i: id }],
+        layout: newLayout,
         components: [...state.components, { id, type, props }],
         nextId: state.nextId + 1,
-        selectedItemId: id,
+        selectedItemId: id, // Select the new component
         containerParents: { ...state.containerParents }
       };
       
@@ -88,7 +93,9 @@ const useLayoutStore = create<LayoutState>((set, get) => ({
       return {
         layout: newLayout,
         components: newComponents,
-        selectedItemId: state.selectedItemId === id ? null : state.selectedItemId,
+        selectedItemId: state.selectedItemId === id || childrenToRemove.includes(state.selectedItemId || '') 
+          ? null 
+          : state.selectedItemId,
         containerParents: newContainerParents
       };
     });
@@ -152,17 +159,15 @@ const useLayoutStore = create<LayoutState>((set, get) => ({
     const children: ComponentItem[] = [];
     const { components, containerParents } = get();
     
-    Object.entries(containerParents).forEach(([childId, parent]) => {
-      if (parent === parentId) {
-        const childComponent = components.find(c => c.id === childId);
-        if (childComponent) {
-          children.push(childComponent);
-          
-          // Add any nested children recursively
-          children.push(...get().getChildComponents(childId));
-        }
-      }
-    });
+    // First level children
+    const directChildren = components.filter(c => 
+      containerParents[c.id] === parentId
+    );
+    
+    children.push(...directChildren);
+    
+    // Don't need recursive lookup for now to avoid circular references
+    // If needed, we can implement a more sophisticated algorithm
     
     return children;
   }

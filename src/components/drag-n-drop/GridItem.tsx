@@ -28,9 +28,16 @@ const GridItem: React.FC<GridItemProps> = ({ component }) => {
   const handleRemove = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    removeComponent(id);
-    toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} component removed`);
-  }, [id, removeComponent, type]);
+    
+    // Immediately select null to avoid any selection issues after deletion
+    selectItem(null);
+    
+    // Small timeout to ensure the UI updates properly before removal
+    setTimeout(() => {
+      removeComponent(id);
+      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} component removed`);
+    }, 10);
+  }, [id, removeComponent, selectItem, type]);
 
   // Pass the id to ContainerComponent for nested components
   const enhancedProps = type === 'container' ? { ...props, id } : props;
@@ -46,14 +53,18 @@ const GridItem: React.FC<GridItemProps> = ({ component }) => {
       onClick={handleSelect}
     >
       <div className="w-full h-full">
-        <PreviewComponent type={type} props={enhancedProps} />
+        <PreviewComponent type={type} props={{ ...enhancedProps, id }} />
       </div>
       
-      {/* Controls overlay */}
-      <div className={`absolute top-0 right-0 p-1 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+      {/* Controls overlay - make more prominent and always visible when selected */}
+      <div 
+        className={`absolute top-0 right-0 p-1 transition-opacity ${
+          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        }`}
+      >
         <button
           onClick={handleRemove}
-          className="w-7 h-7 rounded-full bg-destructive/90 hover:bg-destructive text-white flex items-center justify-center border border-border backdrop-blur-sm"
+          className="w-7 h-7 rounded-full bg-destructive text-white flex items-center justify-center border border-border backdrop-blur-sm shadow-sm"
           aria-label="Remove component"
         >
           <Trash2 className="w-4 h-4" />
