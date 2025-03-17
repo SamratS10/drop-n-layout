@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import PreviewComponent from './preview-components';
 import { ComponentItem } from '@/types/layout';
 import useLayoutStore from '@/store/layoutStore';
-import { X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface GridItemProps {
   component: ComponentItem;
@@ -19,15 +20,20 @@ const GridItem: React.FC<GridItemProps> = ({ component }) => {
   
   const isSelected = selectedItemId === id;
 
-  const handleSelect = (e: React.MouseEvent) => {
+  const handleSelect = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     selectItem(id);
-  };
+  }, [id, selectItem]);
 
-  const handleRemove = (e: React.MouseEvent) => {
+  const handleRemove = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     removeComponent(id);
-  };
+    toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} component removed`);
+  }, [id, removeComponent, type]);
+
+  // Pass the id to ContainerComponent for nested components
+  const enhancedProps = type === 'container' ? { ...props, id } : props;
 
   return (
     <motion.div
@@ -40,16 +46,17 @@ const GridItem: React.FC<GridItemProps> = ({ component }) => {
       onClick={handleSelect}
     >
       <div className="w-full h-full">
-        <PreviewComponent type={type} props={props} />
+        <PreviewComponent type={type} props={enhancedProps} />
       </div>
       
       {/* Controls overlay */}
       <div className={`absolute top-0 right-0 p-1 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
         <button
           onClick={handleRemove}
-          className="w-6 h-6 rounded-full bg-card/80 hover:bg-destructive text-muted-foreground hover:text-white flex items-center justify-center border border-border backdrop-blur-sm"
+          className="w-7 h-7 rounded-full bg-destructive/90 hover:bg-destructive text-white flex items-center justify-center border border-border backdrop-blur-sm"
+          aria-label="Remove component"
         >
-          <X className="w-3 h-3" />
+          <Trash2 className="w-4 h-4" />
         </button>
       </div>
     </motion.div>

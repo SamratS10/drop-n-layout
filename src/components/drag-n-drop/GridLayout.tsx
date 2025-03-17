@@ -7,36 +7,71 @@ import useLayoutStore from '@/store/layoutStore';
 import GridItem from './GridItem';
 import { ComponentType } from '@/types/layout';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const GridLayout: React.FC = () => {
-  const { layout, components, updateLayout, addComponent } = useLayoutStore();
+  const { layout, components, updateLayout, addComponent, selectedItemId, setComponentParent } = useLayoutStore();
   const gridRef = useRef<HTMLDivElement>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isDraggingOverContainer, setIsDraggingOverContainer] = useState<string | null>(null);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDraggingOver(true);
+    
+    // Check if we're dragging over a container
+    const containerElement = e.target as HTMLElement;
+    const containerId = containerElement.getAttribute('data-container-id');
+    
+    if (containerId) {
+      setIsDraggingOverContainer(containerId);
+    } else {
+      setIsDraggingOverContainer(null);
+    }
   }, []);
 
   const handleDragLeave = useCallback(() => {
     setIsDraggingOver(false);
+    setIsDraggingOverContainer(null);
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDraggingOver(false);
-
+    
     try {
       const componentData = JSON.parse(e.dataTransfer.getData('component'));
       
       if (!componentData) return;
 
       const { type, defaultProps, defaultW, defaultH, minW, minH } = componentData;
-
-      // Calculate position within the grid
-      if (gridRef.current) {
+      
+      // Check if we're dropping into a container
+      const target = e.target as HTMLElement;
+      const containerId = target.getAttribute('data-container-id') || 
+                         target.closest('[data-container-id]')?.getAttribute('data-container-id');
+      
+      // Handle drop in container vs grid
+      if (containerId) {
+        // Add to container - we don't need layout coordinates for nested components
+        addComponent(
+          type as ComponentType,
+          {
+            x: 0,
+            y: 0,
+            w: defaultW,
+            h: defaultH,
+            minW,
+            minH,
+          },
+          defaultProps,
+          containerId
+        );
+        toast.success(`Added ${type} to container`);
+      } else if (gridRef.current) {
+        // Add to main grid with coordinates
         const gridRect = gridRef.current.getBoundingClientRect();
         const x = Math.floor((e.clientX - gridRect.left) / 100); // 100px per column (approx)
         const y = Math.floor((e.clientY - gridRect.top) / 100); // 100px per row (approx)
@@ -54,9 +89,13 @@ const GridLayout: React.FC = () => {
           },
           defaultProps
         );
+        toast.success(`Added ${type} component`);
       }
+      
+      setIsDraggingOverContainer(null);
     } catch (error) {
       console.error('Error adding component:', error);
+      toast.error('Failed to add component');
     }
   }, [addComponent]);
 
@@ -81,6 +120,12 @@ const GridLayout: React.FC = () => {
     };
   }, []);
 
+  // Filter to only show components without a parent (top-level)
+  const topLevelComponents = components.filter(component => {
+    const hasParent = useLayoutStore.getState().getComponentParent(component.id) !== null;
+    return !hasParent;
+  });
+
   return (
     <div 
       ref={gridRef}
@@ -91,7 +136,9 @@ const GridLayout: React.FC = () => {
     >
       {isDraggingOver && (
         <motion.div 
-          className="absolute inset-0 bg-primary/5 border-2 border-dashed border-primary/30 z-10 pointer-events-none"
+          className={`absolute inset-0 bg-primary/5 border-2 border-dashed ${
+            isDraggingOverContainer ? 'border-success/50' : 'border-primary/30'
+          } z-10 pointer-events-none`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -112,7 +159,7 @@ const GridLayout: React.FC = () => {
         compactType="vertical"
         preventCollision={false}
       >
-        {components.map((component) => (
+        {topLevelComponents.map((component) => (
           <div key={component.id}>
             <GridItem component={component} />
           </div>

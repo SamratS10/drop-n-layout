@@ -58,6 +58,7 @@ const PreviewComponent: React.FC<PreviewComponentProps> = ({ type, props = {} })
       />;
     case 'container':
       return <ContainerComponent 
+        id={props.id}
         background={props.background} 
         border={props.border} 
         padding={props.padding} 

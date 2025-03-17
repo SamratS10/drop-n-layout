@@ -18,7 +18,7 @@ const DraggableComponent: React.FC<DraggableItemProps> = ({
   const addComponent = useLayoutStore((state) => state.addComponent);
   const itemRef = useRef<HTMLDivElement>(null);
 
-  const handleDragStart = (e: React.DragEvent) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData('component', JSON.stringify({
       type,
       defaultProps,
@@ -34,7 +34,7 @@ const DraggableComponent: React.FC<DraggableItemProps> = ({
     }
   };
 
-  const handleDragEnd = (e: React.DragEvent) => {
+  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
     if (itemRef.current) {
       itemRef.current.classList.remove('dragging');
     }

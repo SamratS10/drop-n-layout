@@ -49,5 +49,5 @@ export interface DraggableItemProps {
 
 export interface PreviewComponentProps {
   type: ComponentType;
-  props: Record<string, any>;
+  props: Record<string, any> & { id?: string };
 }
