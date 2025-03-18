@@ -1,9 +1,8 @@
 
-import React from 'react';
-import { useDrag } from 'react-dnd';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ComponentType, DraggableItemProps } from '@/types/layout';
-import { Card, CardContent } from '@/components/ui/card';
+import { DraggableItemProps } from '@/types/layout';
+import useLayoutStore from '@/store/layoutStore';
 
 const DraggableComponent: React.FC<DraggableItemProps> = ({
   id,
@@ -16,26 +15,11 @@ const DraggableComponent: React.FC<DraggableItemProps> = ({
   minW,
   minH,
 }) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: 'COMPONENT',
-    item: {
-      id,
-      type,
-      defaultProps,
-      defaultW,
-      defaultH,
-      minW,
-      minH,
-    },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }));
+  const addComponent = useLayoutStore((state) => state.addComponent);
+  const itemRef = useRef<HTMLDivElement>(null);
 
-  // Make component draggable both with react-dnd and for HTML5 drag events
-  const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
-    // Set component data for dropping
-    event.dataTransfer.setData('component', JSON.stringify({
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.setData('component', JSON.stringify({
       type,
       defaultProps,
       defaultW,
@@ -43,32 +27,35 @@ const DraggableComponent: React.FC<DraggableItemProps> = ({
       minW,
       minH,
     }));
-    event.dataTransfer.effectAllowed = 'move';
+    
+    // Add some drag effect
+    if (itemRef.current) {
+      itemRef.current.classList.add('dragging');
+    }
+  };
+
+  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    if (itemRef.current) {
+      itemRef.current.classList.remove('dragging');
+    }
   };
 
   return (
-    <div
-      ref={drag}
+    <motion.div
+      ref={itemRef}
       draggable
       onDragStart={handleDragStart}
-      className="cursor-grab active:cursor-grabbing"
-      style={{ opacity: isDragging ? 0.5 : 1 }}
+      onDragEnd={handleDragEnd}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      className="component-item flex items-center gap-2 p-3 rounded-lg border border-border hover:border-primary/30 bg-card hover:bg-card/80 cursor-grab transition-all duration-200 shadow-sm hover:shadow"
     >
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="transition-opacity"
-      >
-        <Card className="mb-2 hover:border-primary/50 transition-colors">
-          <CardContent className="p-3 flex items-center gap-2">
-            <div className="text-muted-foreground">
-              {icon}
-            </div>
-            <span className="text-sm font-medium">{title}</span>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </div>
+      <div className="flex-shrink-0 rounded-md w-8 h-8 bg-primary/10 text-primary flex items-center justify-center">
+        {icon}
+      </div>
+      <span className="text-sm font-medium">{title}</span>
+    </motion.div>
   );
 };
 

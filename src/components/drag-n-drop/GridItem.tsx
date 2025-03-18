@@ -1,5 +1,5 @@
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import PreviewComponent from './preview-components';
 import { ComponentItem } from '@/types/layout';
@@ -13,15 +13,12 @@ interface GridItemProps {
 
 const GridItem: React.FC<GridItemProps> = ({ component }) => {
   const { id, type, props } = component;
-  const [isHovered, setIsHovered] = useState(false);
   
   const selectedItemId = useLayoutStore((state) => state.selectedItemId);
   const selectItem = useLayoutStore((state) => state.selectItem);
   const removeComponent = useLayoutStore((state) => state.removeComponent);
-  const getComponentParent = useLayoutStore((state) => state.getComponentParent);
   
   const isSelected = selectedItemId === id;
-  const isChildOfContainer = getComponentParent(id) !== null;
 
   const handleSelect = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -32,43 +29,42 @@ const GridItem: React.FC<GridItemProps> = ({ component }) => {
     e.stopPropagation();
     e.preventDefault();
     
-    // First select null to avoid selection issues
+    // Immediately select null to avoid any selection issues after deletion
     selectItem(null);
     
-    // Remove the component immediately
-    removeComponent(id);
-    toast.success(`Component removed successfully`);
-  }, [id, removeComponent, selectItem]);
+    // Small timeout to ensure the UI updates properly before removal
+    setTimeout(() => {
+      removeComponent(id);
+      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} component removed`);
+    }, 10);
+  }, [id, removeComponent, selectItem, type]);
 
-  // Pass the id to all components so they can be properly selected
-  const enhancedProps = { ...props, id };
+  // Pass the id to ContainerComponent for nested components
+  const enhancedProps = type === 'container' ? { ...props, id } : props;
 
   return (
     <motion.div
-      className={`w-full h-full relative overflow-hidden ${
-        isSelected ? 'ring-2 ring-primary z-10' : ''
+      className={`w-full h-full relative overflow-hidden group ${
+        isSelected ? 'ring-2 ring-primary rounded-md' : ''
       }`}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2 }}
       onClick={handleSelect}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      data-component-id={id}
     >
       <div className="w-full h-full">
-        <PreviewComponent type={type} props={enhancedProps} />
+        <PreviewComponent type={type} props={{ ...enhancedProps, id }} />
       </div>
       
-      {/* Controls overlay - always visible when selected or hovered */}
+      {/* Controls overlay - make more prominent and always visible when selected */}
       <div 
-        className={`absolute top-1 right-1 p-1 transition-opacity ${
-          isSelected || isHovered ? 'opacity-100' : 'opacity-0'
+        className={`absolute top-0 right-0 p-1 transition-opacity ${
+          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}
       >
         <button
           onClick={handleRemove}
-          className="w-7 h-7 rounded-full bg-destructive/90 hover:bg-destructive text-white flex items-center justify-center border border-border shadow-sm"
+          className="w-7 h-7 rounded-full bg-destructive text-white flex items-center justify-center border border-border backdrop-blur-sm shadow-sm"
           aria-label="Remove component"
         >
           <Trash2 className="w-4 h-4" />
