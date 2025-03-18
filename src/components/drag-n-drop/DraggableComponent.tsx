@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useDrag } from 'react-dnd';
-import { motion, PanInfo } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ComponentType, DraggableItemProps } from '@/types/layout';
 import { Card, CardContent } from '@/components/ui/card';
 

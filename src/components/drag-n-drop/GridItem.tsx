@@ -38,7 +38,7 @@ const GridItem: React.FC<GridItemProps> = ({ component }) => {
     // Remove the component immediately
     removeComponent(id);
     toast.success(`Component removed successfully`);
-  }, [id, removeComponent, selectItem, type]);
+  }, [id, removeComponent, selectItem]);
 
   // Pass the id to all components so they can be properly selected
   const enhancedProps = { ...props, id };

@@ -109,8 +109,6 @@ const ContainerComponent: React.FC<ContainerComponentProps> = ({
             <div 
               key={component.id} 
               className="col-span-12 sm:col-span-6 md:col-span-4 relative"
-              // Prevent event propagation to container
-              onClick={(e) => e.stopPropagation()}
             >
               <PreviewComponent 
                 type={component.type} 
