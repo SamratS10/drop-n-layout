@@ -47,24 +47,28 @@ const DraggableComponent: React.FC<DraggableItemProps> = ({
   };
 
   return (
-    <motion.div
+    <div
       ref={drag}
       draggable
       onDragStart={handleDragStart}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      style={{ opacity: isDragging ? 0.5 : 1 }}
       className="cursor-grab active:cursor-grabbing"
+      style={{ opacity: isDragging ? 0.5 : 1 }}
     >
-      <Card className="mb-2 hover:border-primary/50 transition-colors">
-        <CardContent className="p-3 flex items-center gap-2">
-          <div className="text-muted-foreground">
-            {icon}
-          </div>
-          <span className="text-sm font-medium">{title}</span>
-        </CardContent>
-      </Card>
-    </motion.div>
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="transition-opacity"
+      >
+        <Card className="mb-2 hover:border-primary/50 transition-colors">
+          <CardContent className="p-3 flex items-center gap-2">
+            <div className="text-muted-foreground">
+              {icon}
+            </div>
+            <span className="text-sm font-medium">{title}</span>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
   );
 };
 
