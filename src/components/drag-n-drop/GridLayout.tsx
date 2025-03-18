@@ -19,7 +19,7 @@ const GridLayout: React.FC = () => {
     addComponent, 
     selectedItemId, 
     selectItem,
-    setComponentParent 
+    getComponentParent
   } = useLayoutStore();
   
   const gridRef = useRef<HTMLDivElement>(null);
@@ -42,9 +42,13 @@ const GridLayout: React.FC = () => {
     }
   }, []);
 
-  const handleDragLeave = useCallback(() => {
-    setIsDraggingOver(false);
-    setIsDraggingOverContainer(null);
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    const relatedTarget = e.relatedTarget as Element;
+    // Only set dragging to false if we're actually leaving the grid
+    if (!gridRef.current?.contains(relatedTarget)) {
+      setIsDraggingOver(false);
+      setIsDraggingOverContainer(null);
+    }
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -131,8 +135,7 @@ const GridLayout: React.FC = () => {
 
   // Filter to only show components without a parent (top-level)
   const topLevelComponents = components.filter(component => {
-    const hasParent = useLayoutStore.getState().getComponentParent(component.id) !== null;
-    return !hasParent;
+    return !getComponentParent(component.id);
   });
 
   return (

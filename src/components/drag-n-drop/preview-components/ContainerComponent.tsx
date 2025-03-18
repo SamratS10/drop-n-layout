@@ -24,6 +24,7 @@ const ContainerComponent: React.FC<ContainerComponentProps> = ({
     : [];
   
   const selectItem = useLayoutStore((state) => state.selectItem);
+  const selectedItemId = useLayoutStore((state) => state.selectedItemId);
   
   // Stop propagation to allow selecting components inside the container
   const handleContainerClick = (e: React.MouseEvent) => {
@@ -39,14 +40,16 @@ const ContainerComponent: React.FC<ContainerComponentProps> = ({
     <div 
       className={`w-full h-full ${background} ${padding} ${
         border ? 'border border-border' : ''
-      } ${rounded ? 'rounded-lg' : ''} relative overflow-auto`}
+      } ${rounded ? 'rounded-lg' : ''} relative overflow-auto ${
+        id === selectedItemId ? 'ring-2 ring-primary' : ''
+      }`}
       data-container-id={id}
       onClick={handleContainerClick}
     >
       {childComponents.length > 0 ? (
         <div className="w-full h-full">
           {childComponents.map(component => (
-            <div key={component.id} className="mb-2">
+            <div key={component.id} className="mb-2 relative">
               <PreviewComponent 
                 type={component.type} 
                 props={{ ...component.props, id: component.id }}
@@ -56,7 +59,7 @@ const ContainerComponent: React.FC<ContainerComponentProps> = ({
         </div>
       ) : (
         <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-          Container {id ? `(${id})` : ''}
+          {id ? 'Drag components here' : 'Container'}
         </div>
       )}
     </div>
