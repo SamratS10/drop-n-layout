@@ -19,6 +19,7 @@ const PreviewComponent: React.FC<PreviewComponentProps> = ({ type, props = {} })
   
   // Access the select function from the store
   const selectItem = useLayoutStore((state) => state.selectItem);
+  const selectedItemId = useLayoutStore((state) => state.selectedItemId);
   
   // Handle click on any component to select it
   const handleComponentClick = (e: React.MouseEvent) => {
@@ -32,7 +33,7 @@ const PreviewComponent: React.FC<PreviewComponentProps> = ({ type, props = {} })
   const renderWrappedComponent = (component: React.ReactNode) => {
     return (
       <div 
-        className="w-full h-full" 
+        className={`w-full h-full ${selectedItemId === id ? 'ring-2 ring-primary' : ''}`}
         onClick={handleComponentClick}
         data-component-id={id}
       >

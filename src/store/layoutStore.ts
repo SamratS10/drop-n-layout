@@ -121,13 +121,7 @@ const useLayoutStore = create<LayoutState>((set, get) => ({
   },
 
   selectItem: (id) => {
-    set((state) => {
-      // Only update if there's a change to prevent unnecessary renders
-      if (state.selectedItemId !== id) {
-        return { selectedItemId: id };
-      }
-      return state;
-    });
+    set({ selectedItemId: id });
   },
 
   getLayoutJSON: () => {

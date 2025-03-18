@@ -8,7 +8,7 @@ interface HeadingProps {
 }
 
 const Heading: React.FC<HeadingProps> = ({ 
-  text, 
+  text = 'Heading', 
   level = 'h2', 
   color = 'text-foreground' 
 }) => {

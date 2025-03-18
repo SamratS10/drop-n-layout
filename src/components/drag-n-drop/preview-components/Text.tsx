@@ -7,7 +7,11 @@ interface TextProps {
   size?: string;
 }
 
-const Text: React.FC<TextProps> = ({ text, color = 'text-foreground', size = 'text-base' }) => {
+const Text: React.FC<TextProps> = ({ 
+  text = 'Text content', 
+  color = 'text-foreground', 
+  size = 'text-base' 
+}) => {
   return (
     <p className={`${color} ${size} w-full h-full flex items-center`}>
       {text}

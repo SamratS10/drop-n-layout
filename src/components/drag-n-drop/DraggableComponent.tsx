@@ -32,30 +32,27 @@ const DraggableComponent: React.FC<DraggableItemProps> = ({
     }),
   }));
 
-  // Handle dragging with framer-motion for better visual feedback
-  const handleDragStart = () => {
-    // This is used as a visual indicator only
-    // The actual drag logic is handled by react-dnd
-  };
-
-  // These handlers need to accept the correct types from framer-motion
-  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    // Visual feedback only
-  };
-
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    // Reset any visual states
+  // Make component draggable both with react-dnd and for HTML5 drag events
+  const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
+    // Set component data for dropping
+    event.dataTransfer.setData('component', JSON.stringify({
+      type,
+      defaultProps,
+      defaultW,
+      defaultH,
+      minW,
+      minH,
+    }));
+    event.dataTransfer.effectAllowed = 'move';
   };
 
   return (
     <motion.div
       ref={drag}
       draggable
+      onDragStart={handleDragStart}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      onDragStart={handleDragStart}
-      onPan={handleDrag}
-      onPanEnd={handleDragEnd}
       style={{ opacity: isDragging ? 0.5 : 1 }}
       className="cursor-grab active:cursor-grabbing"
     >
